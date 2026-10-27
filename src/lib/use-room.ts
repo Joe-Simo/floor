@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { eventId, userId as newUserId } from "@/lib/ids";
 import { fold, rank, type RoomEvent } from "@/lib/room";
 import type { RoomTransport, TransportStatus } from "@/lib/transport/types";
@@ -33,6 +33,27 @@ export function saveName(name: string, host = false): Me {
   return loadMe(host);
 }
 
+function subscribeOnline(cb: () => void) {
+  window.addEventListener("online", cb);
+  window.addEventListener("offline", cb);
+  return () => {
+    window.removeEventListener("online", cb);
+    window.removeEventListener("offline", cb);
+  };
+}
+
+/** Whether the browser thinks it has a network. Rooms render client-only, so the server snapshot is never shown. */
+export function useOnline() {
+  return useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
+}
+
+/** Add events not already in the list, keeping the list free of duplicates. */
+function merge(prev: RoomEvent[], more: RoomEvent[]): RoomEvent[] {
+  const have = new Set(prev.map((e) => e.id));
+  const add = more.filter((e) => !have.has(e.id) && (have.add(e.id), true));
+  return add.length ? [...prev, ...add] : prev;
+}
+
 type Distribute<T> = T extends RoomEvent ? Omit<T, "id" | "t" | "by"> : never;
 export type Draft = Distribute<RoomEvent>;
 
@@ -45,6 +66,7 @@ export function useRoom(code: string, opts: { host?: boolean; title?: string } =
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const transport = useRef<RoomTransport | null>(null);
+  const online = useOnline();
 
   useEffect(() => {
     let cancelled = false;
@@ -71,18 +93,30 @@ export function useRoom(code: string, opts: { host?: boolean; title?: string } =
         if (cancelled) return void t.close();
         transport.current = t;
         setMode(t.mode);
-        offs.push(t.onStatus(setStatus));
         const pending: RoomEvent[] = [];
         let ready = false;
+        let last: TransportStatus = "connecting";
+        offs.push(
+          t.onStatus((s) => {
+            // Coming back from a drop: reload history so anything sent while we were away shows up.
+            if (ready && s === "live" && last !== "live") {
+              t?.history()
+                .then((past) => !cancelled && setEvents((prev) => merge(prev, past)))
+                .catch(() => {});
+            }
+            last = s;
+            setStatus(s);
+          }),
+        );
         offs.push(
           t.onEvent((e) => {
             if (!ready) return void pending.push(e);
-            setEvents((prev) => [...prev, e]);
+            setEvents((prev) => merge(prev, [e]));
           }),
         );
         const past = await t.history();
         ready = true;
-        setEvents([...past, ...pending]);
+        setEvents(merge(past, pending));
         setReady(true);
         setStatus((x) => (x === "connecting" ? "live" : x));
       } catch (e) {
@@ -115,5 +149,7 @@ export function useRoom(code: string, opts: { host?: boolean; title?: string } =
   const room = useMemo(() => fold(events), [events]);
   const ranked = useMemo(() => rank(room), [room]);
 
-  return { me, setMe, room, ranked, status, mode, error, ready, send, isHost: !!me && room.hostId === me.userId };
+  const connection: "ok" | "offline" | "reconnecting" = !online ? "offline" : ready && status === "offline" ? "offline" : ready && status === "connecting" ? "reconnecting" : "ok";
+
+  return { me, setMe, room, ranked, status, mode, error, ready, send, online, connection, canSend: ready && (mode === "local" || connection === "ok"), isHost: !!me && room.hostId === me.userId };
 }

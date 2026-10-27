@@ -15,7 +15,10 @@ Built for the [Nexconn Build Challenge 2026](https://reskilll.com/hack/nexconn/)
 - **Host queue.** Answer now, mark answered, hide, reopen. "Answer top question" pins whatever has the most votes.
 - **Projector view.** `/r/CODE/screen` shows the question being answered in large type, the next three, and the join QR.
 - **Room chat.** A side channel for reactions and links that stays out of the question list.
-- **Recap.** One click copies a Markdown summary: answered questions, still open questions, vote counts.
+- **Slow mode.** For big rooms the host can let each person ask once every 30 seconds, 1 minute or 2 minutes. Attendees see a friendly countdown on the Ask button and are nudged to upvote in the meantime. The host is never slowed.
+- **End session.** The host ends the session for everyone with one confirmed tap. Questions, votes and chat close, every phone and the projector switch to the recap, and the QR keeps working so latecomers land on the recap too. The host can reopen if they ended too early.
+- **Recap.** Similar questions are grouped under the one with the most votes ("asked 3 ways"), with the most wanted questions, what got answered and what is still open. Copy it as Markdown or download a `.md` file. Grouping is plain word overlap, so it runs in the browser with no model and no API.
+- **Calm about bad Wi-Fi.** A slim banner says when you are offline or reconnecting and when you are back. After a reconnect Floor reloads the room history, so nothing sent in the meantime is missed.
 
 ## How it works
 
@@ -24,12 +27,14 @@ Every action is an event (`q.ask`, `q.vote`, `q.pin` and so on) sent as a Nexcon
 - late joiners load channel history and catch up;
 - duplicate delivery is harmless, because events are deduplicated by id;
 - arrival order does not matter, because events are sorted by time and id before folding;
-- host rights belong to whoever sent the first `room.open`, and host-only events from anyone else are ignored.
+- host rights belong to whoever sent the first `room.open`, and host-only events from anyone else are ignored;
+- ending a session is an event too (`room.end`), so a reload or a late joiner replays the log and sees the ended room; asks, votes and chat after the end are ignored by every client;
+- slow mode (`room.slow`) is enforced in the fold itself: a question that arrives inside its author's window is dropped the same way on every client, so nobody can skip the line by editing their own page.
 
 The server's only job is identity. `POST /api/session` issues a Nexconn access token with the server API and creates or joins the group channel. The App Secret never leaves the server.
 
 ```
-src/lib/room.ts              event schema, fold, rank, duplicate check, recap
+src/lib/room.ts              event schema, fold, rank, duplicate check, slow mode, grouping, recap
 src/lib/transport/nexconn.ts Nexconn Chat SDK transport
 src/lib/transport/local.ts   demo transport (one browser, BroadcastChannel)
 src/lib/nexconn-server.ts    signed server API calls (token, group create, join)

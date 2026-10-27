@@ -37,3 +37,20 @@ export function ago(t: number, now: number) {
   const h = Math.round(m / 60);
   return `${h} h ago`;
 }
+
+/** "0:42" style countdown. */
+export function clock(ms: number) {
+  const s = Math.ceil(ms / 1000);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+/** "1 minute", "30 seconds", "2 minutes": how slow mode reads in a sentence. */
+export function every(seconds: number) {
+  if (seconds % 60 === 0) return seconds === 60 ? "minute" : `${seconds / 60} minutes`;
+  return `${seconds} seconds`;
+}
+
+/** Short time of day in the viewer's locale, for "ended at". */
+export function timeOfDay(t: number) {
+  return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}

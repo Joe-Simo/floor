@@ -1,5 +1,6 @@
 "use client";
 import type { useRoom } from "@/lib/use-room";
+import { ConnectionBanner } from "./connection-banner";
 import { Wordmark } from "./ui";
 
 /** Shows a calm full-page state while joining or when joining failed, otherwise the room. */
@@ -17,6 +18,7 @@ export function RoomGate({ r, code, children }: { r: ReturnType<typeof useRoom>;
     );
   return (
     <>
+      <ConnectionBanner connection={r.connection} mode={r.mode} />
       {r.mode === "local" && (
         <div className="bg-accent-soft px-4 py-2 text-center text-xs text-accent">Demo mode: this room lives in this browser only. Open it in a second tab to see it update live.</div>
       )}
