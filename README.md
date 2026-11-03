@@ -24,18 +24,19 @@ Built for the [Nexconn Build Challenge 2026](https://reskilll.com/hack/nexconn/)
 
 Every action is an event (`q.ask`, `q.vote`, `q.pin` and so on) sent as a Nexconn custom message (`floor:evt`) to a group channel named `floor-CODE`. Each client folds the event log into the same room state, so:
 
-- late joiners load channel history and catch up;
+- late joiners load channel history and catch up. Nexconn group channels show a new member only messages from after they joined (unless the Console setting "pre-join history access by new member" is on), so a newcomer whose history has no `room.open` sends a `floor:sync` request and the host replies with a persisted snapshot of the log. Snapshots are trusted only from the channel owner, and a reload replays them from the newcomer's own history;
 - duplicate delivery is harmless, because events are deduplicated by id;
 - arrival order does not matter, because events are sorted by time and id before folding;
 - host rights belong to whoever sent the first `room.open`, and host-only events from anyone else are ignored;
 - ending a session is an event too (`room.end`), so a reload or a late joiner replays the log and sees the ended room; asks, votes and chat after the end are ignored by every client;
 - slow mode (`room.slow`) is enforced in the fold itself: a question that arrives inside its author's window is dropped the same way on every client, so nobody can skip the line by editing their own page.
 
-The server's only job is identity. `POST /api/session` issues a Nexconn access token with the server API and creates or joins the group channel. The App Secret never leaves the server.
+The server's only job is identity. `POST /api/session` issues a Nexconn access token with the server API, creates or joins the group channel, and tells the client its data center and the channel owner. The App Secret never leaves the server. Server calls fail over to the backup API domain on a timeout or a 5xx.
 
 ```
 src/lib/room.ts              event schema, fold, rank, duplicate check, slow mode, grouping, recap
 src/lib/transport/nexconn.ts Nexconn Chat SDK transport
+src/lib/transport/wire.ts    message format, sender checks, catch-up snapshots
 src/lib/transport/local.ts   demo transport (one browser, BroadcastChannel)
 src/lib/nexconn-server.ts    signed server API calls (token, group create, join)
 src/app/api/session          token and channel setup
@@ -56,13 +57,17 @@ For real rooms across devices, create a Nexconn app and set:
 ```bash
 NEXCONN_APP_KEY=...
 NEXCONN_APP_SECRET=...
-NEXCONN_API_BASE=...   # the server API domain for your app's data center
+NEXCONN_API_BASE=...          # server API domain for your app's data center, e.g. https://api.us-light-api.com
+NEXCONN_API_BASE_BACKUP=...   # optional backup domain, e.g. https://api-b.us-light-api.com
+NEXCONN_AREA=...              # optional: SG, NA, SA or OM. Inferred as NA for us-light-api, else SG
 ```
+
+The client SDK must use the same data center as the app (`AreaCode.NA` for North America). The server works it out and sends it with the session.
 
 ## Checks
 
 ```bash
-pnpm test        # Vitest: room model, signing, server calls, session API
+pnpm test        # Vitest: room model, signing, failover, session API, wire format
 pnpm typecheck
 pnpm lint
 pnpm build
