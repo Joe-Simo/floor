@@ -1,0 +1,140 @@
+[
+ {
+  "id": "s00",
+  "layout": "host",
+  "clips": [
+   [
+    0.3,
+    6.7
+   ]
+  ],
+  "label": "The live app at floor-beige.vercel.app, Nexconn real mode",
+  "text": "Floor is live Q and A for talks, all hands meetings, and classes. People ask from their phones, they vote, and the best questions rise to the top.",
+  "dur": 9.67
+ },
+ {
+  "id": "s01",
+  "layout": "host",
+  "clips": [
+   [
+    6.7,
+    12.5
+   ]
+  ],
+  "label": "Host opens a room",
+  "text": "The host names the session and opens the floor. The server creates a Nexconn group channel for the room and issues a Nexconn token. The room gets a QR code and a six letter code.",
+  "dur": 12.1
+ },
+ {
+  "id": "s02",
+  "layout": "host+guest",
+  "clips": [
+   [
+    12.5,
+    23.0
+   ]
+  ],
+  "label": "Nexconn: real-time sync",
+  "text": "A guest scans in on a phone. No account and no app install. Maya adds her name and asks. Her question is a Nexconn custom message, and it reaches the host in real time.",
+  "dur": 11.85
+ },
+ {
+  "id": "s03",
+  "layout": "host+guest+late",
+  "clips": [
+   [
+    23.0,
+    30.5
+   ]
+  ],
+  "label": "Nexconn: late joiner catch-up",
+  "text": "A second guest joins late, on a new device. Nexconn hides channel messages sent before a member joins, so the host client sends a snapshot over Nexconn, and the late joiner catches up at once. Their upvote shows up on every screen.",
+  "dur": 16.11
+ },
+ {
+  "id": "s04",
+  "layout": "host+guest+late",
+  "clips": [
+   [
+    30.5,
+    39.7
+   ]
+  ],
+  "label": "Questions ranked by votes",
+  "text": "They ask a question of their own. It joins the queue on every screen, ranked by votes, and Maya upvotes it from her phone.",
+  "dur": 7.73
+ },
+ {
+  "id": "s05",
+  "layout": "guest+late",
+  "clips": [
+   [
+    39.7,
+    52.6
+   ]
+  ],
+  "label": "Room chat on the same Nexconn channel",
+  "text": "Every room also has a chat for side conversation. Maya says hello from the back row, and the late joiner replies. Both messages travel over the same Nexconn group channel.",
+  "dur": 11.08
+ },
+ {
+  "id": "s06",
+  "layout": "screen+guest",
+  "clips": [
+   [
+    52.6,
+    63.2
+   ]
+  ],
+  "label": "Projector view",
+  "text": "The host pins a question to answer. Every phone marks it as being answered, and the projector view shows it in large type, with the code to join.",
+  "dur": 8.64
+ },
+ {
+  "id": "s07",
+  "layout": "host+guest+late",
+  "clips": [
+   [
+    63.2,
+    73.3
+   ]
+  ],
+  "label": "Nexconn: reload replay",
+  "text": "Reload any page and the room comes back. Every action is an event in the Nexconn channel. Each client replays the channel history and the host snapshot, and rebuilds the same state. The votes, the pin, and each guest's identity all return.",
+  "dur": 17.03
+ },
+ {
+  "id": "s08",
+  "layout": "host+screen",
+  "clips": [
+   [
+    73.3,
+    78.4
+   ]
+  ],
+  "label": "Done, next",
+  "text": "Done, next marks it answered, and the projector moves on to the top open question.",
+  "dur": 5.17
+ },
+ {
+  "id": "s09",
+  "layout": "screen+guest",
+  "clips": [
+   [
+    78.4,
+    85.2
+   ]
+  ],
+  "label": "Session recap",
+  "text": "When the host ends the session, everyone sees the same recap, with the most wanted questions first.",
+  "dur": 6.07
+ },
+ {
+  "id": "s10",
+  "layout": "end",
+  "clips": [],
+  "label": "",
+  "text": "Floor runs on the Nexconn Chat SDK, live today. Open a room at floor beige dot vercel dot app.",
+  "dur": 7.71
+ }
+]
