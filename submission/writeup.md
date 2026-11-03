@@ -5,7 +5,7 @@ Nexconn Build Challenge 2026 submission
 - Live app: <https://floor-beige.vercel.app>
 - Source: <https://github.com/Joe-Simo/floor>
 - Nexconn App Key: `8brlm7uf89gq3` (app "Floor", North America data center)
-- Demo video: VIDEO LINK GOES HERE (Vimeo)
+- Demo video: <https://vimeo.com/1242867796>
 
 ## Why Floor exists
 

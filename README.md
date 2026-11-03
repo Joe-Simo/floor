@@ -6,6 +6,9 @@ Floor is live audience Q&A for meetups, classes, all-hands and panels. The host 
 
 Nobody signs up. Attendees scan, ask and vote.
 
+- Live app: https://floor-beige.vercel.app
+- Demo video (2 min): https://vimeo.com/1242867796
+
 Built for the [Nexconn Build Challenge 2026](https://reskilll.com/hack/nexconn/). Realtime delivery runs on the Nexconn Chat SDK.
 
 ## What it does
